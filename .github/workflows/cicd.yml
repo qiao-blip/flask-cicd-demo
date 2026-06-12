@@ -1,0 +1,41 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [ main, master ]  # 你的代码主分支，按需修改
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to SWR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.SWR_REGISTRY }}
+          username: ${{ secrets.SWR_USERNAME }}
+          password: ${{ secrets.SWR_PASSWORD }}
+
+      - name: Build & Push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # 镜像：你的仓库yunjisuan1 + backend，版本用git提交ID
+          tags: ${{ secrets.SWR_REGISTRY }}/yunjisuan1/backend:${{ github.sha }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Config kubectl access
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+
+      - name: Update K8s deployment
+        run: |
+          # 替换为你实际的 Deployment 名称 和 容器名、命名空间
+          kubectl set image deployment/backend-deploy backend=${{ secrets.SWR_REGISTRY }}/yunjisuan1/backend:${{ github.sha }} -n default
+          kubectl rollout restart deployment/backend-deploy -n default
