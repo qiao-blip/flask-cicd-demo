@@ -21,11 +21,14 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          dockerfile: ./Dockerfile
           push: true
-          tags: swr.cn-east-3.myhuaweicloud.com/hid_yr6o4jntwc10vt2/yunjisuan-backend:${{ github.sha }}
+          tags: swr.cn-east-3.myhuaweicloud.com/yunjisuan1/yunjisuan-backend:${{ github.sha }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.28.0'
 
       - name: Configure kubectl access
         run: |
@@ -34,5 +37,5 @@ jobs:
 
       - name: Update CCE deployment
         run: |
-          kubectl set image deployment/yunjisuan-backend yunjisuan-backend-container=swr.cn-east-3.myhuaweicloud.com/hid_yr6o4jntwc10vt2/yunjisuan-backend:${{ github.sha }} -n default
+          kubectl set image deployment/yunjisuan-backend yunjisuan-backend-container=swr.cn-east-3.myhuaweicloud.com/yunjisuan1/yunjisuan-backend:${{ github.sha }} -n default
           kubectl rollout restart deployment/yunjisuan-backend -n default
