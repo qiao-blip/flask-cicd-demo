@@ -25,17 +25,8 @@ jobs:
           push: true
           tags: swr.cn-east-3.myhuaweicloud.com/yunjisuan1/yunjisuan-backend:${{ github.sha }}
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.28.0'
-
-      - name: Configure kubectl access
+      - name: Post Build & Push Success
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-
-      - name: Update CCE deployment
-        run: |
-          kubectl set image deployment/yunjisuan-backend yunjisuan-backend-container=swr.cn-east-3.myhuaweicloud.com/yunjisuan1/yunjisuan-backend:${{ github.sha }} -n default
-          kubectl rollout restart deployment/yunjisuan-backend -n default
+          echo "✅ 镜像构建并推送成功：swr.cn-east-3.myhuaweicloud.com/yunjisuan1/yunjisuan-backend:${{ github.sha }}"
+          echo "📋 集群更新命令（已在CloudShell手动执行）："
+          echo "kubectl set image deployment/yunjisuan-backend yunjisuan-backend-container=swr.cn-east-3.myhuaweicloud.com/yunjisuan1/yunjisuan-backend:${{ github.sha }} -n default"
